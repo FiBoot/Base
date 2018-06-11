@@ -1,4 +1,3 @@
-
 /**
  * Base Options Interface
  * @class IBaseOptions
@@ -6,62 +5,66 @@
 class IBaseOptions {
 	timeout: number;
 	loopCallback: (timestamp?: number) => void;
-	keyCallback: (key: any, pressed: boolean) => void; // TODO: type de la key
+	keyCallback: (key: string, pressed: boolean) => void;
+	preventDefaultAllKey: boolean;
+	preventDefaultKeys: string[];
 }
 
 /**
  * @class Base
  */
-class Base {
+class Base implements IBaseOptions {
 	
-	private timeout: number;
-	private interval;
-	private loopCallback: (timestamp?: number) => void;
-	private keyCallback: (key: any, pressed: boolean) => void;
+	timeout: number;
+	loopCallback: (timestamp?: number) => void;
+	keyCallback: (key: string, pressed: boolean) => void;
+	PreventDefaultAllKey: boolean;
+	preventDefaultKeys: string[] = [];
 
+	private interval;
 	private timestamp: number;
 	private running: boolean
 
 	constructor(options: IBaseOptions) {
+		// mapping options
 		Object.assign(this, options);
 
-		window.addEventListener('keydown', event => {
-			if (this.keyCallback) {
-				this.keyCallback(event.key, true);
-			}
+		// mapping key callbacks
+		window.addEventListener('keydown', (event: KeyboardEvent) => {
+			if (this.PreventDefaultAllKey || this.preventDefaultKeys.includes(event.key)) { event.preventDefault(); }
+			if (this.keyCallback) { this.keyCallback(event.key, true); }
 		});
 		window.addEventListener('keyup', event => {
-			if (this.keyCallback) {
-				this.keyCallback(event.key, false);
-			}
+			if (this.PreventDefaultAllKey || this.preventDefaultKeys.includes(event.key)) { event.preventDefault(); }
+			if (this.keyCallback) { this.keyCallback(event.key, false); }
 		});
 
+		// initializing
 		this.stop();
 	}
 
 	/**
 	 * GETTER SETTER
 	 */
-
 	public isRunning(): boolean {
 		return this.running;
 	}
-	public getTimeout() {
+	public getTimeout(): number {
 		return this.timeout;
 	}
-	public setTimeout(timeout: number, force?: boolean) {
+	public setTimeout(timeout: number, force?: boolean): boolean {
 		if (!this.running || force) {
 			this.timeout = timeout;
+			return true;
 		} else {
 			console.warn('[setTimeout] Cannot set timeout while running');
+			return false;
 		}
 	}
-
 
 	/**
 	 * FUNC
 	 */
-	
 	public start(): void {
 		this.running = true;
 		this.loop();

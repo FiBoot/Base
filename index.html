@@ -1,0 +1,88 @@
+<script src="base.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+	
+	function loopCallback(interval) {
+		$('#playerInput').val(`Running.. [${interval} tick]`);
+	}
+	function keyCallback(key, pressed) {
+		$("#feedbackInput").val(`Key ${key} ${(pressed ? 'pressed' : 'release')}`);
+		if (pressed) {
+			switch (key) {
+				case 'p':	(B.isRunning() ? pauseClick : playClick)();
+				break;
+				case 's': stopClick();
+			}
+		}
+	}
+	var B = new Base({
+		loopCallback: loopCallback,
+		keyCallback: keyCallback,
+		preventDefaultKeys: ['Tab']
+	});
+
+	B.setTimeout(1000);
+
+
+	function playClick() {
+		B.start();
+		$('#startButton').hide();
+		$('#pauseButton').show();
+	}
+	function pauseClick() {
+		B.pause();
+		$('#pauseButton').hide();
+		$('#startButton').show();
+	}
+	function stopClick() {
+		B.stop();
+		$('#pauseButton').hide();
+		$('#startButton').show();
+		$('#playerInput').val(`Stopped`);
+	}
+	function setTimeoutClick() {
+		B.setTimeout($('#timeoutSelect').val(), $('#timeoutForceCheckbox').prop('checked'));
+	}
+
+	$(document).ready(() => {
+		$('#pauseButton').hide();
+	});
+
+</script>
+
+<body>
+	
+	<fieldset>
+		<legend>Controls</legend>
+		<button id="startButton" onclick="playClick()">Start</button>
+		<button id="pauseButton" onclick="pauseClick()">Pause</button>
+		<button id="stopButton" onclick="stopClick()">Stop</button>
+	</fieldset>
+	
+	<fieldset>
+		<legend>Params</legend>
+		<label>Timeout: </label>
+		<select id="timeoutSelect">
+			<option val="1">1</option>
+			<option val="10">10</option>
+			<option val="100">100</option>
+			<option val="1000">1000</option>
+			<option val="10000">10000</option>
+		</select>
+		<label>Force: </label>
+		<input type="checkbox" id="timeoutForceCheckbox">
+		<button id="setTimeoutButton" onclick="setTimeoutClick()">Set</button>
+	</fieldset>
+
+	<fieldset>
+		<legend>Feedback</legend>
+		<label>Player: </label>
+		<input type="text" id="playerInput" readonly>
+		<label>Keys: </label>
+		<input type="text" id="feedbackInput" readonly>
+	</fieldset>
+
+
+	<canvas id="canvas"></canvas>
+
+</body>
