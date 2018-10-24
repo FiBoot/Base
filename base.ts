@@ -18,12 +18,12 @@ class Base implements IBaseOptions {
 	timeout: number;
 	loopCallback: (timestamp?: number) => void;
 	keyCallback: (key: string, pressed: boolean) => void;
-	PreventDefaultAllKey: boolean;
+	preventDefaultAllKey: boolean;
 	preventDefaultKeys: string[] = [];
 
 	private interval;
 	private timestamp: number;
-	private running: boolean
+	private running: boolean;
 
 	constructor(options: IBaseOptions) {
 		// mapping options
