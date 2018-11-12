@@ -1,24 +1,48 @@
+
 /**
- * Base Options Interface
- * @class IBaseOptions
+ * @interface IBaseOptions
  */
-class IBaseOptions {
+interface IBaseOptions {
+	/**
+	 * time between loop call
+	 * @type {number}
+	 * @memberof IBaseOptions
+	 */
+	timeout: number;
+	/**
+	 * callback function for loop
+	 * @memberof IBaseOptions
+	 */
+	loopCallback: (timestamp?: number) => void;
+	/**
+	 * callback function for keys
+	 * @memberof IBaseOptions
+	 */
+	keyCallback: (key: string, pressed: boolean) => void;
+	/**
+	 * Boolean preventing all keys
+	 * @type {boolean}
+	 * @memberof IBaseOptions
+	 */
+	preventDefaultAllKey: boolean;
+	/**
+	 * String array preventing specifice key names
+	 * @type {string[]}
+	 * @memberof IBaseOptions
+	 */
+	preventDefaultKeys: string[];
+}
+
+
+/**
+ * @class Base
+ * @implements {IBaseOptions}
+ */
+class Base implements IBaseOptions {
 	timeout: number;
 	loopCallback: (timestamp?: number) => void;
 	keyCallback: (key: string, pressed: boolean) => void;
 	preventDefaultAllKey: boolean;
-	preventDefaultKeys: string[];
-}
-
-/**
- * @class Base
- */
-class Base implements IBaseOptions {
-	
-	timeout: number;
-	loopCallback: (timestamp?: number) => void;
-	keyCallback: (key: string, pressed: boolean) => void;
-	PreventDefaultAllKey: boolean;
 	preventDefaultKeys: string[] = [];
 
 	private interval;
@@ -26,26 +50,20 @@ class Base implements IBaseOptions {
 	private running: boolean
 
 	constructor(options: IBaseOptions) {
-		// mapping options
 		Object.assign(this, options);
 
-		// mapping key callbacks
 		window.addEventListener('keydown', (event: KeyboardEvent) => {
-			if (this.PreventDefaultAllKey || this.preventDefaultKeys.includes(event.key)) { event.preventDefault(); }
+			if (this.preventDefaultAllKey || this.preventDefaultKeys.includes(event.key)) { event.preventDefault(); }
 			if (this.keyCallback) { this.keyCallback(event.key, true); }
 		});
 		window.addEventListener('keyup', event => {
-			if (this.PreventDefaultAllKey || this.preventDefaultKeys.includes(event.key)) { event.preventDefault(); }
+			if (this.preventDefaultAllKey || this.preventDefaultKeys.includes(event.key)) { event.preventDefault(); }
 			if (this.keyCallback) { this.keyCallback(event.key, false); }
 		});
 
-		// initializing
 		this.stop();
 	}
 
-	/**
-	 * GETTER SETTER
-	 */
 	public isRunning(): boolean {
 		return this.running;
 	}
@@ -62,9 +80,10 @@ class Base implements IBaseOptions {
 		}
 	}
 
-	/**
-	 * FUNC
-	 */
+	public stop(): void {
+		this.running = false;
+		this.timestamp = 0;
+	}
 	public start(): void {
 		this.running = true;
 		this.loop();
@@ -75,10 +94,6 @@ class Base implements IBaseOptions {
 		if (this.running) {
 			this.interval = setTimeout(this.start.bind(this), this.timeout);
 		}
-	}
-	public stop(): void {
-		this.running = false;
-		this.timestamp = 0;
 	}
 
 	private loop(): void {

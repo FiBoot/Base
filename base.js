@@ -1,24 +1,14 @@
 /**
- * Base Options Interface
- * @class IBaseOptions
+ * @class JsBase
+ * @implements {IBaseOptions}
  */
-var IBaseOptions = /** @class */ (function () {
-    function IBaseOptions() {
-    }
-    return IBaseOptions;
-}());
-/**
- * @class Base
- */
-var Base = /** @class */ (function () {
+var JsBase = /** @class */ (function () {
     function Base(options) {
         var _this = this;
         this.preventDefaultKeys = [];
-        // mapping options
         Object.assign(this, options);
-        // mapping key callbacks
         window.addEventListener('keydown', function (event) {
-            if (_this.PreventDefaultAllKey || _this.preventDefaultKeys.includes(event.key)) {
+            if (_this.preventDefaultAllKey || _this.preventDefaultKeys.includes(event.key)) {
                 event.preventDefault();
             }
             if (_this.keyCallback) {
@@ -26,19 +16,15 @@ var Base = /** @class */ (function () {
             }
         });
         window.addEventListener('keyup', function (event) {
-            if (_this.PreventDefaultAllKey || _this.preventDefaultKeys.includes(event.key)) {
+            if (_this.preventDefaultAllKey || _this.preventDefaultKeys.includes(event.key)) {
                 event.preventDefault();
             }
             if (_this.keyCallback) {
                 _this.keyCallback(event.key, false);
             }
         });
-        // initializing
         this.stop();
     }
-    /**
-     * GETTER SETTER
-     */
     Base.prototype.isRunning = function () {
         return this.running;
     };
@@ -55,9 +41,10 @@ var Base = /** @class */ (function () {
             return false;
         }
     };
-    /**
-     * FUNC
-     */
+    Base.prototype.stop = function () {
+        this.running = false;
+        this.timestamp = 0;
+    };
     Base.prototype.start = function () {
         this.running = true;
         this.loop();
@@ -68,10 +55,6 @@ var Base = /** @class */ (function () {
         if (this.running) {
             this.interval = setTimeout(this.start.bind(this), this.timeout);
         }
-    };
-    Base.prototype.stop = function () {
-        this.running = false;
-        this.timestamp = 0;
     };
     Base.prototype.loop = function () {
         if (this.running) {
